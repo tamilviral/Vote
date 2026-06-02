@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registration Successful — People's Party</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div style="width:52px;height:52px;background:linear-gradient(135deg,#FF6B00,#006B3C);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">🏛️</div>
+    <div class="header-title">
+      <h1>People's Party of India</h1>
+      <p>Membership Registration Portal</p>
+    </div>
+  </div>
+</header>
+
+<div class="success-wrapper">
+  <div class="success-card">
+    <span class="success-icon">🎉</span>
+    <h2>Registration Successful!</h2>
+    <p>Welcome to the People's Party of India, <strong id="memberName">Member</strong>!</p>
+    <p style="font-size:0.82rem;color:var(--text-muted);">Your unique Member ID is:</p>
+    <div class="member-id-display" id="memberId">PPI-2026-XXXXXX</div>
+    <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:20px;">Please save this ID for your future reference.</p>
+    <a href="index.html" class="btn-home">← Back to Home</a>
+  </div>
+</div>
+
+<script>
+  const data = JSON.parse(sessionStorage.getItem('newMember') || '{}');
+  if (data.name) document.getElementById('memberName').textContent = data.name;
+  if (data.memberId) document.getElementById('memberId').textContent = data.memberId;
+</script>
+</body>
+</html>

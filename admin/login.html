@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login — People's Party</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div class="admin-login-wrapper">
+  <div class="admin-login-card">
+    <div class="admin-login-title">
+      <span class="lock-icon">🔐</span>
+      <h2>Admin Panel</h2>
+      <p>Sign in to manage member registrations</p>
+    </div>
+    <form id="loginForm" novalidate>
+      <div class="field" style="margin-bottom:16px;">
+        <label for="adminUser">Username <span class="req">*</span></label>
+        <input type="text" id="adminUser" placeholder="Enter admin username" autocomplete="username"/>
+      </div>
+      <div class="field" style="margin-bottom:20px;">
+        <label for="adminPass">Password <span class="req">*</span></label>
+        <input type="password" id="adminPass" placeholder="Enter password" autocomplete="current-password"/>
+      </div>
+      <div class="field-error" id="loginError" style="margin-bottom:12px;font-size:0.82rem;">Invalid credentials. Please try again.</div>
+      <button type="submit" class="btn-login" id="loginBtn">Login to Dashboard</button>
+    </form>
+    <p style="text-align:center;margin-top:16px;font-size:0.75rem;color:var(--text-muted);">
+      <a href="../index.html" style="color:var(--saffron);text-decoration:none;">← Back to Registration</a>
+    </p>
+  </div>
+</div>
+
+<script>
+  // Obfuscated credentials
+  const _c = atob('YWRtaW4=');         // admin
+  const _p = atob('cGFydHlAMTIz');     // party@123
+
+  if (sessionStorage.getItem('adminAuth') === 'true') {
+    window.location.href = 'dashboard.html';
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const u = document.getElementById('adminUser').value.trim();
+    const p = document.getElementById('adminPass').value;
+    const errEl = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+
+    if (u === _c && p === _p) {
+      errEl.classList.remove('show');
+      btn.textContent = 'Signing in...';
+      btn.disabled = true;
+      sessionStorage.setItem('adminAuth', 'true');
+      setTimeout(() => window.location.href = 'dashboard.html', 600);
+    } else {
+      errEl.classList.add('show');
+      document.getElementById('adminPass').value = '';
+      document.getElementById('adminPass').focus();
+    }
+  });
+</script>
+</body>
+</html>
