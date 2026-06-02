@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard — People's Party</title>
   <link rel="stylesheet" href="../css/style.css"/>
+  <script src="../js/data.js"></script>
 </head>
 <body>
 
@@ -51,6 +52,70 @@
       <input type="password" id="confirmAdminPass" placeholder="Confirm new password" />
     </div>
     <button onclick="changeAdminPassword()" class="btn-submit" id="btnChangePass">Update Password</button>
+  </div>
+</div>
+
+<!-- Modal: Edit Member -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal" style="max-width:550px;">
+    <div class="modal-header">
+      <h3>✏️ Edit Member Details</h3>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <form id="editForm" style="display:flex; flex-direction:column; gap:12px;">
+      <input type="hidden" id="editId" />
+      <div class="form-grid">
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="editName" required />
+        </div>
+        <div class="field">
+          <label>Father's / Husband's Name</label>
+          <input type="text" id="editFatherName" required />
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" id="editPhone" maxlength="10" required />
+        </div>
+        <div class="field">
+          <label>Email ID</label>
+          <input type="email" id="editEmail" />
+        </div>
+        <div class="field">
+          <label>Religion</label>
+          <select id="editReligion" required>
+            <option value="">Select Religion</option>
+            <option value="Hindu">Hindu</option>
+            <option value="Muslim">Muslim</option>
+            <option value="Christian">Christian</option>
+            <option value="Sikh">Sikh</option>
+            <option value="Buddhist">Buddhist</option>
+            <option value="Jain">Jain</option>
+            <option value="Parsi">Parsi</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>City</label>
+          <input type="text" id="editCity" required />
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>District</label>
+          <select id="editDistrict" required></select>
+        </div>
+        <div class="field">
+          <label>Taluk</label>
+          <select id="editTaluk" required></select>
+        </div>
+        <div class="field">
+          <label>Assembly</label>
+          <select id="editAssembly" required></select>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit" id="btnSaveEdit">Save Changes</button>
+    </form>
   </div>
 </div>
 
@@ -173,7 +238,7 @@ document.addEventListener('keydown', e => {
 });
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, orderBy, query }
+import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, updateDoc, orderBy, query }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ─── AUTH GUARD ───────────────────────────────────────
@@ -296,6 +361,7 @@ function renderTable(members) {
       <td style="font-size:0.78rem;color:var(--text-muted);">${formatDate(m.registeredAt)}</td>
       <td>
         <button class="btn-view" onclick="viewMember('${m.id}')">View</button>
+        <button class="btn-edit" onclick="openEditModal('${m.id}')">Edit</button>
         <button class="btn-delete" onclick="openDeleteModal('${m.id}')">Delete</button>
       </td>
     </tr>
@@ -327,6 +393,94 @@ function applyFilters() {
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 document.getElementById('districtFilter').addEventListener('change', applyFilters);
 document.getElementById('assemblyFilter').addEventListener('change', applyFilters);
+
+// ─── EDIT MODAL ──────────────────────────────────────
+const districtSelect = document.getElementById('editDistrict');
+const talukSelect    = document.getElementById('editTaluk');
+const assemblySelect = document.getElementById('editAssembly');
+
+function populateSelect(sel, items, selectedValue) {
+  sel.innerHTML = '<option value="">Select option</option>';
+  items.forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item; opt.textContent = item;
+    if (item === selectedValue) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+districtSelect.addEventListener('change', function() {
+  const d = this.value;
+  if (!d) {
+    populateSelect(talukSelect, []); populateSelect(assemblySelect, []);
+  } else {
+    populateSelect(talukSelect, districtTalukMap[d] || []);
+    populateSelect(assemblySelect, districtAssemblyMap[d] || []);
+  }
+});
+
+window.openEditModal = function(id) {
+  const m = allMembers.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('editId').value = m.id;
+  document.getElementById('editName').value = m.name || '';
+  document.getElementById('editFatherName').value = m.fatherName || '';
+  document.getElementById('editPhone').value = m.phone || '';
+  document.getElementById('editEmail').value = m.email || '';
+  document.getElementById('editReligion').value = m.religion || '';
+  document.getElementById('editCity').value = m.city || '';
+
+  populateSelect(districtSelect, Object.keys(districtAssemblyMap).sort(), m.district);
+  
+  if (m.district) {
+    populateSelect(talukSelect, districtTalukMap[m.district] || [], m.taluk);
+    populateSelect(assemblySelect, districtAssemblyMap[m.district] || [], m.assembly);
+  } else {
+    populateSelect(talukSelect, []); populateSelect(assemblySelect, []);
+  }
+  
+  document.getElementById('editModal').classList.add('show');
+};
+
+window.closeEditModal = function() {
+  document.getElementById('editModal').classList.remove('show');
+};
+
+document.getElementById('editForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const id = document.getElementById('editId').value;
+  const btn = document.getElementById('btnSaveEdit');
+  
+  const updatedData = {
+    name: document.getElementById('editName').value.trim(),
+    fatherName: document.getElementById('editFatherName').value.trim(),
+    phone: document.getElementById('editPhone').value.trim(),
+    email: document.getElementById('editEmail').value.trim(),
+    religion: document.getElementById('editReligion').value,
+    city: document.getElementById('editCity').value.trim(),
+    district: document.getElementById('editDistrict').value,
+    taluk: document.getElementById('editTaluk').value,
+    assembly: document.getElementById('editAssembly').value,
+  };
+
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  try {
+    await updateDoc(doc(db, 'members', id), updatedData);
+    showToast('Member updated successfully.', 'success');
+    
+    // Update local data and re-render
+    const idx = allMembers.findIndex(m => m.id === id);
+    if (idx !== -1) allMembers[idx] = { ...allMembers[idx], ...updatedData };
+    applyFilters();
+    updateStats();
+    closeEditModal();
+  } catch (err) {
+    console.error(err);
+    showToast('Failed to update member.', 'error');
+  } finally {
+    btn.textContent = 'Save Changes'; btn.disabled = false;
+  }
+});
 
 // ─── VIEW MODAL ──────────────────────────────────────
 window.viewMember = function(id) {
@@ -449,6 +603,9 @@ document.getElementById('viewModal').addEventListener('click', function(e) {
 });
 document.getElementById('deleteModal').addEventListener('click', function(e) {
   if (e.target === this) closeDeleteModal();
+});
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
 });
 document.getElementById('passwordModal').addEventListener('click', function(e) {
   if (e.target === this) closePasswordModal();
