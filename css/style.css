@@ -801,8 +801,42 @@ input.error { border-color: var(--error); }
 .loading-overlay.hidden { opacity: 0; pointer-events: none; }
 .loader { width: 44px; height: 44px; border: 3px solid var(--border); border-top-color: var(--saffron); border-radius: 50%; animation: spin 0.8s linear infinite; }
 
-@media(max-width:768px) {
-  .sidebar { width: 0; overflow: hidden; }
-  .main-content { margin-left: 0; padding: 16px; }
-  .form-card { padding: 24px 20px; }
+@media (max-width: 768px) {
+  /* ── ADMIN DASHBOARD MOBILE (Bottom Nav) ── */
+  .dashboard-layout { flex-direction: column; }
+  .sidebar {
+    width: 100%; height: auto; position: fixed; top: auto; bottom: 0; left: 0;
+    flex-direction: row; justify-content: space-between; padding: 8px 12px;
+    border-right: none; border-top: 1px solid var(--border); z-index: 1000;
+    background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(10px);
+  }
+  .sidebar-brand { display: none; }
+  .sidebar nav { display: flex; flex-direction: row; width: 100%; justify-content: space-around; }
+  .nav-item { 
+    flex-direction: column; gap: 4px; padding: 8px; 
+    border-left: none; border-top: 3px solid transparent; 
+    font-size: 0.7rem; text-align: center; border-radius: 8px;
+  }
+  .nav-item.active { border-left-color: transparent; border-top-color: transparent; background: rgba(255,107,0,0.15); color: var(--saffron); }
+  .nav-icon { font-size: 1.2rem; }
+  .sidebar-footer { padding: 0; border: none; margin: 0; display: flex; align-items: center; justify-content: center; }
+  .btn-logout { padding: 8px; font-size: 0.7rem; width: auto; border: none; background: transparent; }
+  
+  .main-content { margin-left: 0; padding: 16px; margin-bottom: 76px; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .table-toolbar { flex-direction: column; align-items: stretch; }
+  .search-box, .filter-select { width: 100%; }
+
+  /* ── PUBLIC REGISTRATION MOBILE ── */
+  .form-card { padding: 24px 16px; }
+  .hero { padding: 40px 16px 20px; }
+  .hero h2 { font-size: 1.6rem; }
+  .header-inner { height: auto; padding: 12px 0; flex-wrap: wrap; justify-content: center; text-align: center; gap: 8px; }
+  .header-title h1 { font-size: 1.15rem; }
+  .live-counter-bar { gap: 10px; }
+  .live-counter-card { padding: 8px 16px; width: 100%; justify-content: center; }
+
+  /* ── MODALS & EXTRAS ── */
+  .modal { padding: 24px 16px; }
+  .admin-login-card { padding: 36px 24px; }
 }
