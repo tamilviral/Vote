@@ -32,32 +32,97 @@
   </div>
 </div>
 
-<script>
-  // Obfuscated credentials
-  const _c = atob('YWRtaW4=');         // admin
-  const _p = atob('cGFydHlAMTIz');     // party@123
+<script type="module">
+  // ─── SECURITY: DISABLE RIGHT-CLICK & INSPECT ──────────
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    if (e.key === 'F12' || 
+       (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) ||
+       (e.ctrlKey && ['U','u'].includes(e.key))) {
+      e.preventDefault();
+    }
+  });
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ─── FIREBASE CONFIG ───────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyBV3zirH8vvXbZ_mzACFTFDqfWZNg9gaB4",
+    authDomain: "vote-52f2e.firebaseapp.com",
+    databaseURL: "https://vote-52f2e-default-rtdb.firebaseio.com",
+    projectId: "vote-52f2e",
+    storageBucket: "vote-52f2e.firebasestorage.app",
+    messagingSenderId: "1079946614337",
+    appId: "1:1079946614337:web:693137b66ec2cbef0a98c0"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // ─── CRYPTO (SHA-256) ───────────────────────────────────
+  async function hashString(str) {
+    const data = new TextEncoder().encode(str);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Default Fallback Hashes (SHA-256 for admin / party@123)
+  const _cHash = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
+  const _pHash = '9d86333c1620aeb95315354be22394fccfcdb8243be7a4bb7f55b1f86cd29a43';
 
   if (sessionStorage.getItem('adminAuth') === 'true') {
     window.location.href = 'dashboard.html';
   }
 
-  document.getElementById('loginForm').addEventListener('submit', function(e) {
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const u = document.getElementById('adminUser').value.trim();
     const p = document.getElementById('adminPass').value;
     const errEl = document.getElementById('loginError');
     const btn = document.getElementById('loginBtn');
 
-    if (u === _c && p === _p) {
-      errEl.classList.remove('show');
-      btn.textContent = 'Signing in...';
-      btn.disabled = true;
-      sessionStorage.setItem('adminAuth', 'true');
-      setTimeout(() => window.location.href = 'dashboard.html', 600);
-    } else {
+    if (!u || !p) {
       errEl.classList.add('show');
-      document.getElementById('adminPass').value = '';
-      document.getElementById('adminPass').focus();
+      return;
+    }
+
+    errEl.classList.remove('show');
+    btn.textContent = 'Verifying...';
+    btn.disabled = true;
+
+    try {
+      // Hash entered credentials
+      const uHash = await hashString(u);
+      const pHash = await hashString(p);
+
+      // Check custom password in Firestore
+      const adminDoc = await getDoc(doc(db, 'settings', 'admin'));
+      let valid = false;
+
+      if (adminDoc.exists()) {
+        const data = adminDoc.data();
+        if (data.username === uHash && data.password === pHash) valid = true;
+      } else {
+        // Fallback to default if no custom password is set
+        if (uHash === _cHash && pHash === _pHash) valid = true;
+      }
+
+      if (valid) {
+        sessionStorage.setItem('adminAuth', 'true');
+        window.location.href = 'dashboard.html';
+      } else {
+        errEl.classList.add('show');
+        document.getElementById('adminPass').value = '';
+        document.getElementById('adminPass').focus();
+        btn.textContent = 'Login to Dashboard';
+        btn.disabled = false;
+      }
+    } catch (err) {
+      console.error(err);
+      errEl.textContent = 'Connection error. Please try again.';
+      errEl.classList.add('show');
+      btn.textContent = 'Login to Dashboard';
+      btn.disabled = false;
     }
   });
 </script>

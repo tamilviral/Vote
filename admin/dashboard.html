@@ -35,6 +35,25 @@
   </div>
 </div>
 
+<!-- Modal: Change Password -->
+<div class="modal-overlay" id="passwordModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h3>🔑 Change Admin Password</h3>
+      <button class="modal-close" onclick="closePasswordModal()">✕</button>
+    </div>
+    <div class="field" style="margin-bottom:16px;">
+      <label>New Password</label>
+      <input type="password" id="newAdminPass" placeholder="Enter new password" />
+    </div>
+    <div class="field" style="margin-bottom:24px;">
+      <label>Confirm Password</label>
+      <input type="password" id="confirmAdminPass" placeholder="Confirm new password" />
+    </div>
+    <button onclick="changeAdminPassword()" class="btn-submit" id="btnChangePass">Update Password</button>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast">
   <span class="toast-icon" id="toastIcon"></span>
@@ -49,11 +68,14 @@
       <p>People's Party of India</p>
     </div>
     <nav>
-      <div class="nav-item active" id="navMembers">
+      <div class="nav-item active" id="navMembers" onclick="switchTab('members')">
         <span class="nav-icon">👥</span> All Members
       </div>
-      <div class="nav-item" id="navStats" onclick="window.location.reload()">
+      <div class="nav-item" id="navStats" onclick="switchTab('stats')">
         <span class="nav-icon">📊</span> Statistics
+      </div>
+      <div class="nav-item" onclick="openPasswordModal()">
+        <span class="nav-icon">🔑</span> Change Password
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -117,6 +139,8 @@
               <th>Name</th>
               <th>Father's Name</th>
               <th>Phone</th>
+              <th>Email</th>
+              <th>Religion</th>
               <th>City</th>
               <th>District</th>
               <th>Assembly</th>
@@ -138,8 +162,18 @@
 </div>
 
 <script type="module">
+// ─── SECURITY: DISABLE RIGHT-CLICK & INSPECT ──────────
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (e.key === 'F12' || 
+     (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) ||
+     (e.ctrlKey && ['U','u'].includes(e.key))) {
+    e.preventDefault();
+  }
+});
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, deleteDoc, orderBy, query }
+import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, orderBy, query }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ─── AUTH GUARD ───────────────────────────────────────
@@ -254,6 +288,8 @@ function renderTable(members) {
       <td style="font-weight:600;">${m.name || '—'}</td>
       <td>${m.fatherName || '—'}</td>
       <td>${m.phone || '—'}</td>
+      <td>${m.email || '—'}</td>
+      <td>${m.religion || '—'}</td>
       <td>${m.city || '—'}</td>
       <td><span class="district-badge">${m.district || '—'}</span></td>
       <td style="font-size:0.8rem;">${m.assembly || '—'}</td>
@@ -302,6 +338,7 @@ window.viewMember = function(id) {
     <div class="detail-row"><span class="detail-label">Father's Name</span><span class="detail-value">${m.fatherName || '—'}</span></div>
     <div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value">${m.phone || '—'}</span></div>
     <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${m.email || 'Not provided'}</span></div>
+    <div class="detail-row"><span class="detail-label">Religion</span><span class="detail-value">${m.religion || '—'}</span></div>
     <div class="detail-row"><span class="detail-label">City</span><span class="detail-value">${m.city || '—'}</span></div>
     <div class="detail-row"><span class="detail-label">District</span><span class="detail-value">${m.district || '—'}</span></div>
     <div class="detail-row"><span class="detail-label">Taluk</span><span class="detail-value">${m.taluk || '—'}</span></div>
@@ -345,9 +382,9 @@ window.confirmDelete = async function() {
 // ─── EXPORT CSV ──────────────────────────────────────
 window.exportCSV = function() {
   if (filteredMembers.length === 0) { showToast('No data to export.', 'error'); return; }
-  const headers = ['Member ID','Name','Father Name','Phone','Email','City','District','Taluk','Assembly','Registered On'];
+  const headers = ['Member ID','Name','Father Name','Phone','Email','Religion','City','District','Taluk','Assembly','Registered On'];
   const rows = filteredMembers.map(m => [
-    m.memberId, m.name, m.fatherName, m.phone, m.email || '',
+    m.memberId, m.name, m.fatherName, m.phone, m.email || '', m.religion || '',
     m.city, m.district, m.taluk, m.assembly, formatDate(m.registeredAt)
   ].map(v => `"${(v || '').replace(/"/g, '""')}"`).join(','));
   const csv  = [headers.join(','), ...rows].join('\n');
@@ -362,6 +399,50 @@ window.exportCSV = function() {
 // ─── INIT ────────────────────────────────────────────
 loadMembers();
 
+// ─── CRYPTO (SHA-256) ───────────────────────────────────
+async function hashString(str) {
+  const data = new TextEncoder().encode(str);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ─── CHANGE PASSWORD ──────────────────────────────────
+window.openPasswordModal = function() {
+  document.getElementById('newAdminPass').value = '';
+  document.getElementById('confirmAdminPass').value = '';
+  document.getElementById('passwordModal').classList.add('show');
+};
+window.closePasswordModal = function() {
+  document.getElementById('passwordModal').classList.remove('show');
+};
+window.changeAdminPassword = async function() {
+  const p1 = document.getElementById('newAdminPass').value;
+  const p2 = document.getElementById('confirmAdminPass').value;
+  if (!p1) return showToast('Please enter a password', 'error');
+  if (p1 !== p2) return showToast('Passwords do not match', 'error');
+
+  const btn = document.getElementById('btnChangePass');
+  btn.textContent = 'Updating...'; btn.disabled = true;
+  try {
+    // Store securely as SHA-256 hashes
+    const uHash = await hashString('admin');
+    const pHash = await hashString(p1);
+    await setDoc(doc(db, 'settings', 'admin'), {
+      username: uHash,
+      password: pHash,
+      updatedAt: new Date().toISOString()
+    });
+    showToast('Password updated successfully!', 'success');
+    setTimeout(() => {
+      closePasswordModal();
+    }, 1000);
+  } catch (err) {
+    showToast('Failed to update password', 'error');
+  } finally {
+    btn.textContent = 'Update Password'; btn.disabled = false;
+  }
+};
+
 // Close modals on overlay click
 document.getElementById('viewModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
@@ -369,6 +450,28 @@ document.getElementById('viewModal').addEventListener('click', function(e) {
 document.getElementById('deleteModal').addEventListener('click', function(e) {
   if (e.target === this) closeDeleteModal();
 });
+document.getElementById('passwordModal').addEventListener('click', function(e) {
+  if (e.target === this) closePasswordModal();
+});
+// ─── TAB SWITCHING ──────────────────────────────────────
+window.switchTab = function(tab) {
+  const mTab = document.getElementById('navMembers');
+  const sTab = document.getElementById('navStats');
+  const tableCard = document.querySelector('.table-card');
+  const pageHeaderTitle = document.querySelector('.page-header h2');
+
+  if (tab === 'members') {
+    mTab.classList.add('active');
+    sTab.classList.remove('active');
+    tableCard.style.display = 'block';
+    pageHeaderTitle.textContent = 'Member Management';
+  } else {
+    sTab.classList.add('active');
+    mTab.classList.remove('active');
+    tableCard.style.display = 'none';
+    pageHeaderTitle.textContent = 'Statistics Dashboard';
+  }
+};
 </script>
 </body>
 </html>

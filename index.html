@@ -148,6 +148,16 @@
   </footer>
 
   <script type="module">
+    // ─── SECURITY: DISABLE RIGHT-CLICK & INSPECT ──────────
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F12' || 
+         (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) ||
+         (e.ctrlKey && ['U','u'].includes(e.key))) {
+        e.preventDefault();
+      }
+    });
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, onSnapshot }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -167,7 +177,7 @@
 
     // ─── LIVE MEMBER COUNT TRACKER ────────────────────────
     function isToday(ts) {
-      if (!ts) return false;
+      if (!ts) return true; // Pending local writes are always today
       const d = ts.toDate ? ts.toDate() : new Date(ts);
       const n = new Date();
       return d.getDate() === n.getDate() && d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
@@ -365,6 +375,7 @@
       if (!data.district) { showError('district', true); valid = false; } else showError('district', false);
       if (!data.taluk) { showError('taluk', true); valid = false; } else showError('taluk', false);
       if (!data.assembly) { showError('assembly', true); valid = false; } else showError('assembly', false);
+      if (!data.religion) { showError('religion', true); valid = false; } else showError('religion', false);
       return valid;
     }
 
@@ -387,6 +398,7 @@
         district: document.getElementById('district').value,
         taluk: document.getElementById('taluk').value,
         assembly: document.getElementById('assembly').value,
+        religion: document.getElementById('religion').value,
       };
 
       if (!validateForm(data)) return;
