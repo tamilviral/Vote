@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome — People's Party</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .question-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 60vh;
+      padding: 20px;
+    }
+
+    .question-card {
+      background: var(--card-bg, #ffffff);
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .profile-photo {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid #ffffff;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .question-card h2 {
+      margin-bottom: 20px;
+      color: var(--text-color, #333);
+      font-size: 1.4rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #006B3C, #009955);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+      flex: 1;
+    }
+
+    .btn-no {
+      background: #f0f0f0;
+      color: #333;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+      flex: 1;
+    }
+
+    .btn-yes:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .btn-no:hover {
+      background: #e0e0e0;
+      transform: translateY(-2px);
+    }
+
+    /* Poll Results styles */
+    .poll-results {
+      display: none;
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .poll-bar-container {
+      margin-bottom: 15px;
+    }
+
+    .poll-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .poll-track {
+      width: 100%;
+      height: 12px;
+      background: #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .poll-fill {
+      height: 100%;
+      border-radius: 6px;
+      width: 0%;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .fill-yes {
+      background: linear-gradient(135deg, #006B3C, #009955);
+    }
+
+    .fill-no {
+      background: #FF6B00;
+    }
+
+    .redirect-msg {
+      margin-top: 25px;
+      font-size: 0.85rem;
+      color: #888;
+      text-align: center;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.6;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0.6;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div
+        style="width:52px;height:52px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+        <img src="img/logo.png" alt="PPI Logo" style="width:100%;height:100%;object-fit:cover;" />
+      </div>
+      <div class="header-title">
+        <h1>People's Party of India</h1>
+        <p>Membership Registration Portal</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="question-wrapper">
+    <div class="question-card">
+      <div class="profile-photo">
+        <img src="img/profile.jpg" alt="Profile Photo" />
+      </div>
+      <h2 id="questionText">தனி கட்சி ஆரம்பித்தால் அண்ணாமலைக்கு உங்கள் ஆதரவு உண்டா?</h2>
+
+      <div class="btn-group" id="btnGroup">
+        <button class="btn-yes" onclick="submitVote('yes')">Yes</button>
+        <button class="btn-no" onclick="submitVote('no')">No</button>
+      </div>
+
+      <div class="poll-results" id="pollResults">
+        <h3 style="margin-bottom: 20px; text-align: center; color: #333; font-size: 1.05rem;">Current Public Response
+        </h3>
+
+        <div class="poll-bar-container">
+          <div class="poll-label">
+            <span>Yes</span>
+            <span id="yesPercentText">0%</span>
+          </div>
+          <div class="poll-track">
+            <div class="poll-fill fill-yes" id="yesFill"></div>
+          </div>
+        </div>
+
+        <div class="poll-bar-container">
+          <div class="poll-label">
+            <span>No</span>
+            <span id="noPercentText">0%</span>
+          </div>
+          <div class="poll-track">
+            <div class="poll-fill fill-no" id="noFill"></div>
+          </div>
+        </div>
+
+        <div class="redirect-msg">Processing your response...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function submitVote(choice) {
+      // Hide buttons
+      document.getElementById('btnGroup').style.display = 'none';
+
+      // Change question text
+      document.getElementById('questionText').textContent = "Thank you for your response!";
+
+      // Show results area
+      const pollResults = document.getElementById('pollResults');
+      pollResults.style.display = 'block';
+
+      // Static percentages (e.g. 89% Yes, 11% No)
+      const yesPercent = 89;
+      const noPercent = 11;
+
+      // Animate bars after a short delay
+      setTimeout(() => {
+        document.getElementById('yesFill').style.width = yesPercent + '%';
+        document.getElementById('noFill').style.width = noPercent + '%';
+
+        // Animate numbers
+        animateNumber('yesPercentText', yesPercent);
+        animateNumber('noPercentText', noPercent);
+      }, 100);
+
+      // Redirect after delay
+      setTimeout(() => {
+        if (choice === 'yes') {
+          window.location.href = 'index.html';
+        } else {
+          window.location.href = 'thank_you.html';
+        }
+      }, 3500); // 3.5 seconds delay before redirecting
+    }
+
+    function animateNumber(elementId, target) {
+      const el = document.getElementById(elementId);
+      let current = 0;
+      // Calculate a decent step time so the animation completes in ~1 second
+      const stepTime = Math.max(10, Math.floor(1000 / target));
+
+      const timer = setInterval(() => {
+        current += 1;
+        el.textContent = current + '%';
+        if (current >= target) {
+          clearInterval(timer);
+          el.textContent = target + '%';
+        }
+      }, stepTime);
+    }
+  </script>
+</body>
+
+</html>
