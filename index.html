@@ -35,7 +35,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-icon">🗳️</div>
-    <h2>அண்ணாமலை தனி கட்சி </h2>
+    <h2>அண்ணாமலை தனி கட்சி அமைக்க உங்கள் ஆதரவு உண்டா? </h2>
     <p>தமிழ்நாட்டின் முன்னேற்றதிற்காக உழைப்போம்.</p>
 
     <!-- Live Counter -->
@@ -60,31 +60,31 @@
       <form id="registrationForm" novalidate>
 
         <!-- Personal Information -->
-        <div class="section-title">👤 Personal Information</div>
+        <div class="section-title">👤 Personal Information / தனிப்பட்ட விவரங்கள்</div>
         <div class="form-grid">
           <div class="field">
-            <label for="name">Full Name <span class="req">*</span></label>
+            <label for="name">Full Name / முழுப் பெயர் <span class="req">*</span></label>
             <input type="text" id="name" name="name" placeholder="Enter your full name" autocomplete="name" />
             <span class="field-error" id="nameError">Please enter your full name.</span>
           </div>
           <div class="field">
-            <label for="fatherName">Father's Name / Husband's Name <span class="req">*</span></label>
+            <label for="fatherName">Father's / Husband's Name / தந்தை / கணவர் பெயர் <span class="req">*</span></label>
             <input type="text" id="fatherName" name="fatherName" placeholder="Enter father's or husband's name" />
             <span class="field-error" id="fatherNameError">Please enter your father's name.</span>
           </div>
           <div class="field">
-            <label for="phone">Phone Number <span class="req">*</span></label>
+            <label for="phone">Phone Number / அலைபேசி எண் <span class="req">*</span></label>
             <input type="tel" id="phone" name="phone" placeholder="10-digit mobile number" maxlength="10"
               autocomplete="tel" />
             <span class="field-error" id="phoneError">Enter a valid 10-digit phone number.</span>
           </div>
           <div class="field">
-            <label for="email">Email ID <span class="opt">(Optional)</span></label>
+            <label for="email">Email ID / மின்னஞ்சல் <span class="opt\">(Optional)</span></label>
             <input type="email" id="email" name="email" placeholder="your@email.com" autocomplete="email" />
             <span class="field-error" id="emailError">Enter a valid email address.</span>
           </div>
           <div class="field">
-            <label for="religion">Religion <span class="req">*</span></label>
+            <label for="religion">Religion / மதம் <span class="req">*</span></label>
             <select id="religion" name="religion">
               <option value="">-- Select Religion --</option>
               <option value="Hindu">Hindu</option>
@@ -97,34 +97,35 @@
         </div>
 
         <!-- Location Information -->
-        <div class="section-title" style="margin-top:8px;">📍 Location Details</div>
+        <div class="section-title" style="margin-top:8px;">📍 Location Details / இருப்பிட விவரங்கள்</div>
         <div class="form-grid">
           <div class="field">
-            <label for="pincode">Pincode <span class="req">*</span></label>
-            <input type="text" id="pincode" name="pincode" placeholder="Enter 6-digit pincode" maxlength="6" inputmode="numeric" />
+            <label for="pincode">Pincode / அஞ்சல் குறியீடு <span class="req">*</span></label>
+            <input type="text" id="pincode" name="pincode" placeholder="Enter 6-digit pincode" maxlength="6"
+              inputmode="numeric" />
             <span class="field-error" id="pincodeError">Please enter a valid 6-digit pincode.</span>
           </div>
           <div class="field">
-            <label for="city">City / Town / Village <span class="req">*</span></label>
+            <label for="city">City / Town / Village / ஊர் <span class="req">*</span></label>
             <input type="text" id="city" name="city" placeholder="Your city or village" />
             <span class="field-error" id="cityError">Please enter your city.</span>
           </div>
           <div class="field">
-            <label for="district">District <span class="req">*</span></label>
+            <label for="district">District / மாவட்டம் <span class="req">*</span></label>
             <select id="district" name="district">
               <option value="">-- Select District --</option>
             </select>
             <span class="field-error" id="districtError">Please select your district.</span>
           </div>
           <div class="field">
-            <label for="taluk">Taluk <span class="req">*</span></label>
+            <label for="taluk">Taluk / தாலுகா <span class="req">*</span></label>
             <select id="taluk" name="taluk" disabled>
               <option value="">-- Select District First --</option>
             </select>
             <span class="field-error" id="talukError">Please select your taluk.</span>
           </div>
           <div class="field">
-            <label for="assembly">Legislative Assembly Constituency <span class="req">*</span></label>
+            <label for="assembly">Legislative Assembly Constituency / சட்டமன்ற தொகுதி <span class="req">*</span></label>
             <select id="assembly" name="assembly" disabled>
               <option value="">-- Select District First --</option>
             </select>
@@ -134,7 +135,7 @@
 
         <!-- Submit -->
         <button type="submit" class="btn-submit" id="submitBtn">
-          <span class="btn-text">✅ Submit Registration</span>
+          <span class="btn-text">✅ Submit Registration / பதிவு செய்</span>
           <span class="spinner"></span>
         </button>
       </form>
@@ -147,9 +148,11 @@
       <p>Welcome to the People's Party of India.</p>
       <p>Your official Member ID is:</p>
       <div class="member-id-display" id="displayMemberId">PPI-000000</div>
-      
-      <button class="btn-submit" onclick="window.location.href='ticket.html'" style="margin-bottom:12px;">🎟️ View Membership Ticket</button>
-      <button class="btn-home" style="width:100%; box-sizing:border-box;" onclick="window.location.reload()">Register Another Member</button>
+
+      <button class="btn-submit" onclick="window.location.href='ticket.html'" style="margin-bottom:12px;">🎟️ View
+        Membership Ticket</button>
+      <button class="btn-home" style="width:100%; box-sizing:border-box;" onclick="window.location.reload()">Register
+        Another Member</button>
     </div>
 
   </div>
@@ -169,9 +172,9 @@
     // ─── SECURITY: DISABLE RIGHT-CLICK & INSPECT ──────────
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('keydown', e => {
-      if (e.key === 'F12' || 
-         (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) ||
-         (e.ctrlKey && ['U','u'].includes(e.key))) {
+      if (e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) ||
+        (e.ctrlKey && ['U', 'u'].includes(e.key))) {
         e.preventDefault();
       }
     });
@@ -222,11 +225,11 @@
       if (docSnap.exists()) {
         isEnabled = docSnap.data().liveTrackingEnabled !== false;
       }
-      
+
       const bar = document.querySelector('.live-counter-bar');
       if (isEnabled) {
         if (bar) bar.style.display = 'flex'; // or whatever the original display was (CSS has flex probably)
-        
+
         if (!membersUnsubscribe) {
           membersUnsubscribe = onSnapshot(collection(db, 'members'), (snap) => {
             const total = snap.size;
@@ -299,41 +302,51 @@
     });
 
     // ─── PINCODE AUTO-FETCH ────────────────────────────────
-    document.getElementById('pincode').addEventListener('input', async function() {
+    let verifiedPincode = null;
+
+    document.getElementById('pincode').addEventListener('input', async function () {
       const pin = this.value.trim();
       if (pin.length === 6 && /^\d+$/.test(pin)) {
         try {
-          // Show small loading on field if desired, but we'll keep it simple
           const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
           const data = await res.json();
           if (data && data[0].Status === 'Success') {
+            verifiedPincode = pin;
+            showError('pincode', false);
             const postOffice = data[0].PostOffice[0];
             const apiDistrict = postOffice.District || '';
             const apiBlock = postOffice.Block || postOffice.Region || ''; // API sometimes has Taluk in Block
-            
+
             const districtOpts = Array.from(districtSelect.options);
             const matchedDistrict = districtOpts.find(o => o.value && apiDistrict && (o.value.toLowerCase() === apiDistrict.toLowerCase() || o.value.toLowerCase().includes(apiDistrict.toLowerCase()) || apiDistrict.toLowerCase().includes(o.value.toLowerCase())));
-            
+
             if (matchedDistrict && matchedDistrict.value) {
               districtSelect.value = matchedDistrict.value;
               districtSelect.dispatchEvent(new Event('change'));
-              
+
               setTimeout(() => {
                 const talukOpts = Array.from(talukSelect.options);
-                const matchedTaluk = talukOpts.find(o => 
-                  o.value && apiBlock && (o.value.toLowerCase() === apiBlock.toLowerCase() || 
-                  apiBlock.toLowerCase().includes(o.value.toLowerCase()) || 
-                  o.value.toLowerCase().includes(apiBlock.toLowerCase()))
+                const matchedTaluk = talukOpts.find(o =>
+                  o.value && apiBlock && (o.value.toLowerCase() === apiBlock.toLowerCase() ||
+                    apiBlock.toLowerCase().includes(o.value.toLowerCase()) ||
+                    o.value.toLowerCase().includes(apiBlock.toLowerCase()))
                 );
                 if (matchedTaluk) {
                   talukSelect.value = matchedTaluk.value;
                 }
               }, 100);
             }
+          } else {
+            verifiedPincode = null;
+            showError('pincode', true);
+            const errEl = document.getElementById('pincodeError');
+            if(errEl) errEl.textContent = 'Invalid Pincode. Please check.';
           }
-        } catch(e) {
+        } catch (e) {
           console.error("Pincode fetch error:", e);
         }
+      } else {
+        verifiedPincode = null;
       }
     });
 
@@ -361,13 +374,44 @@
       else { el?.classList.remove('show'); inp?.classList.remove('error'); }
     }
 
-    function validateForm(data) {
+    async function validateForm(data) {
       let valid = true;
       if (!data.name.trim()) { showError('name', true); valid = false; } else showError('name', false);
       if (!data.fatherName.trim()) { showError('fatherName', true); valid = false; } else showError('fatherName', false);
       if (!/^[6-9]\d{9}$/.test(data.phone)) { showError('phone', true); valid = false; } else showError('phone', false);
       if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) { showError('email', true); valid = false; } else showError('email', false);
-      if (!/^\d{6}$/.test(data.pincode)) { showError('pincode', true); valid = false; } else showError('pincode', false);
+      
+      // Pincode validation
+      if (!/^\d{6}$/.test(data.pincode)) { 
+        showError('pincode', true); 
+        const errEl = document.getElementById('pincodeError');
+        if(errEl) errEl.textContent = 'Please enter a valid 6-digit pincode.';
+        valid = false; 
+      } else {
+        if (data.pincode !== verifiedPincode) {
+          try {
+            const res = await fetch(`https://api.postalpincode.in/pincode/${data.pincode}`);
+            const json = await res.json();
+            if (json && json[0].Status === 'Success') {
+              verifiedPincode = data.pincode;
+              showError('pincode', false);
+            } else {
+              showError('pincode', true);
+              const errEl = document.getElementById('pincodeError');
+              if(errEl) errEl.textContent = 'Invalid Pincode. Please check.';
+              valid = false;
+            }
+          } catch(e) {
+            showError('pincode', true);
+            const errEl = document.getElementById('pincodeError');
+            if(errEl) errEl.textContent = 'Invalid Pincode. Please check.';
+            valid = false;
+          }
+        } else {
+          showError('pincode', false);
+        }
+      }
+
       if (!data.city.trim()) { showError('city', true); valid = false; } else showError('city', false);
       if (!data.district) { showError('district', true); valid = false; } else showError('district', false);
       if (!data.taluk) { showError('taluk', true); valid = false; } else showError('taluk', false);
@@ -383,9 +427,28 @@
       return `PPI-${year}-${rand}`;
     }
 
+    // ─── ENTER KEY TO MOVE TO NEXT FIELD ──────────────────
+    document.getElementById('registrationForm').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const activeElements = Array.from(this.elements).filter(el => !el.disabled && el.type !== 'submit' && el.type !== 'fieldset');
+        const index = activeElements.indexOf(document.activeElement);
+        if (index > -1 && index < activeElements.length - 1) {
+          activeElements[index + 1].focus();
+        } else if (index === activeElements.length - 1) {
+          document.getElementById('submitBtn').focus();
+        }
+      }
+    });
+
     // ─── FORM SUBMIT ──────────────────────────────────────
     document.getElementById('registrationForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.classList.add('loading');
+
       const data = {
         name: document.getElementById('name').value.trim(),
         fatherName: document.getElementById('fatherName').value.trim(),
@@ -399,11 +462,12 @@
         religion: document.getElementById('religion').value,
       };
 
-      if (!validateForm(data)) return;
-
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.classList.add('loading');
+      const isValid = await validateForm(data);
+      if (!isValid) {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        return;
+      }
 
       try {
         // Check duplicate phone
