@@ -28,7 +28,7 @@
         <h1>People's Party of India</h1>
         <p>Membership Registration Portal</p>
       </div>
-      <span class="header-badge">Official</span>
+      <a href="admin/login.html" class="header-badge" style="text-decoration:none;">Official</a>
     </div>
   </header>
 
@@ -100,6 +100,11 @@
         <div class="section-title" style="margin-top:8px;">📍 Location Details</div>
         <div class="form-grid">
           <div class="field">
+            <label for="pincode">Pincode <span class="req">*</span></label>
+            <input type="text" id="pincode" name="pincode" placeholder="Enter 6-digit pincode" maxlength="6" inputmode="numeric" />
+            <span class="field-error" id="pincodeError">Please enter a valid 6-digit pincode.</span>
+          </div>
+          <div class="field">
             <label for="city">City / Town / Village <span class="req">*</span></label>
             <input type="text" id="city" name="city" placeholder="Your city or village" />
             <span class="field-error" id="cityError">Please enter your city.</span>
@@ -157,8 +162,7 @@
 
   <!-- Footer -->
   <footer class="site-footer">
-    <p>© 2026 People's Party of India — All rights reserved &nbsp;|&nbsp; <a href="admin/login.html"
-        style="color:var(--saffron);text-decoration:none;">Admin Panel</a></p>
+    <p>© 2026 People's Party of India — All rights reserved</p>
   </footer>
 
   <script type="module">
@@ -173,7 +177,7 @@
     });
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, onSnapshot }
+    import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, onSnapshot, doc }
       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // ─── FIREBASE CONFIG (Obfuscated) ─────────────────────
@@ -210,14 +214,36 @@
       }, speed);
     }
 
-    // Real-time listener — fires instantly on any Firestore change
-    onSnapshot(collection(db, 'members'), (snap) => {
-      const total = snap.size;
-      const today = snap.docs.filter(d => isToday(d.data().registeredAt)).length;
-      const liveEl = document.getElementById('liveCount');
-      const todayEl = document.getElementById('todayCount');
-      if (liveEl) animateCount(liveEl, total);
-      if (todayEl) animateCount(todayEl, today);
+    let membersUnsubscribe = null;
+
+    // Real-time listener for live tracking setting
+    onSnapshot(doc(db, 'settings', 'general'), (docSnap) => {
+      let isEnabled = true; // default
+      if (docSnap.exists()) {
+        isEnabled = docSnap.data().liveTrackingEnabled !== false;
+      }
+      
+      const bar = document.querySelector('.live-counter-bar');
+      if (isEnabled) {
+        if (bar) bar.style.display = 'flex'; // or whatever the original display was (CSS has flex probably)
+        
+        if (!membersUnsubscribe) {
+          membersUnsubscribe = onSnapshot(collection(db, 'members'), (snap) => {
+            const total = snap.size;
+            const today = snap.docs.filter(d => isToday(d.data().registeredAt)).length;
+            const liveEl = document.getElementById('liveCount');
+            const todayEl = document.getElementById('todayCount');
+            if (liveEl) animateCount(liveEl, total);
+            if (todayEl) animateCount(todayEl, today);
+          });
+        }
+      } else {
+        if (bar) bar.style.display = 'none';
+        if (membersUnsubscribe) {
+          membersUnsubscribe();
+          membersUnsubscribe = null;
+        }
+      }
     });
 
 
@@ -272,6 +298,45 @@
       populateSelect(assemblySelect, constituencies, '-- Select Constituency --');
     });
 
+    // ─── PINCODE AUTO-FETCH ────────────────────────────────
+    document.getElementById('pincode').addEventListener('input', async function() {
+      const pin = this.value.trim();
+      if (pin.length === 6 && /^\d+$/.test(pin)) {
+        try {
+          // Show small loading on field if desired, but we'll keep it simple
+          const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+          const data = await res.json();
+          if (data && data[0].Status === 'Success') {
+            const postOffice = data[0].PostOffice[0];
+            const apiDistrict = postOffice.District || '';
+            const apiBlock = postOffice.Block || postOffice.Region || ''; // API sometimes has Taluk in Block
+            
+            const districtOpts = Array.from(districtSelect.options);
+            const matchedDistrict = districtOpts.find(o => o.value && apiDistrict && (o.value.toLowerCase() === apiDistrict.toLowerCase() || o.value.toLowerCase().includes(apiDistrict.toLowerCase()) || apiDistrict.toLowerCase().includes(o.value.toLowerCase())));
+            
+            if (matchedDistrict && matchedDistrict.value) {
+              districtSelect.value = matchedDistrict.value;
+              districtSelect.dispatchEvent(new Event('change'));
+              
+              setTimeout(() => {
+                const talukOpts = Array.from(talukSelect.options);
+                const matchedTaluk = talukOpts.find(o => 
+                  o.value && apiBlock && (o.value.toLowerCase() === apiBlock.toLowerCase() || 
+                  apiBlock.toLowerCase().includes(o.value.toLowerCase()) || 
+                  o.value.toLowerCase().includes(apiBlock.toLowerCase()))
+                );
+                if (matchedTaluk) {
+                  talukSelect.value = matchedTaluk.value;
+                }
+              }, 100);
+            }
+          }
+        } catch(e) {
+          console.error("Pincode fetch error:", e);
+        }
+      }
+    });
+
     // ─── HIDE LOADER ──────────────────────────────────────
     window.addEventListener('load', () => {
       const lo = document.getElementById('loadingOverlay');
@@ -302,6 +367,7 @@
       if (!data.fatherName.trim()) { showError('fatherName', true); valid = false; } else showError('fatherName', false);
       if (!/^[6-9]\d{9}$/.test(data.phone)) { showError('phone', true); valid = false; } else showError('phone', false);
       if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) { showError('email', true); valid = false; } else showError('email', false);
+      if (!/^\d{6}$/.test(data.pincode)) { showError('pincode', true); valid = false; } else showError('pincode', false);
       if (!data.city.trim()) { showError('city', true); valid = false; } else showError('city', false);
       if (!data.district) { showError('district', true); valid = false; } else showError('district', false);
       if (!data.taluk) { showError('taluk', true); valid = false; } else showError('taluk', false);
@@ -325,6 +391,7 @@
         fatherName: document.getElementById('fatherName').value.trim(),
         phone: document.getElementById('phone').value.trim(),
         email: document.getElementById('email').value.trim(),
+        pincode: document.getElementById('pincode').value.trim(),
         city: document.getElementById('city').value.trim(),
         district: document.getElementById('district').value,
         taluk: document.getElementById('taluk').value,

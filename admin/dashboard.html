@@ -142,6 +142,9 @@
       <div class="nav-item" onclick="openPasswordModal()">
         <span class="nav-icon">🔑</span> Change Password
       </div>
+      <div class="nav-item" onclick="toggleLiveTracking()" id="navLiveTracking">
+        <span class="nav-icon" id="liveTrackingIcon">🟢</span> <span id="liveTrackingText">Live Tracking: ON</span>
+      </div>
     </nav>
     <div class="sidebar-footer">
       <button class="btn-logout" onclick="logout()">🚪 Logout</button>
@@ -238,7 +241,7 @@ document.addEventListener('keydown', e => {
 });
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, updateDoc, orderBy, query }
+import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, updateDoc, orderBy, query, getDoc }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ─── AUTH GUARD ───────────────────────────────────────
@@ -552,6 +555,7 @@ window.exportCSV = function() {
 
 // ─── INIT ────────────────────────────────────────────
 loadMembers();
+loadLiveTrackingSettings();
 
 // ─── CRYPTO (SHA-256) ───────────────────────────────────
 async function hashString(str) {
@@ -627,6 +631,43 @@ window.switchTab = function(tab) {
     mTab.classList.remove('active');
     tableCard.style.display = 'none';
     pageHeaderTitle.textContent = 'Statistics Dashboard';
+  }
+};
+
+// ─── LIVE TRACKING TOGGLE ───────────────────────────────
+let isLiveTrackingEnabled = true;
+
+async function loadLiveTrackingSettings() {
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'general'));
+    if (snap.exists()) {
+      isLiveTrackingEnabled = snap.data().liveTrackingEnabled !== false;
+    }
+    updateLiveTrackingUI();
+  } catch(e) {
+    console.error('Failed to load tracking settings', e);
+  }
+}
+
+function updateLiveTrackingUI() {
+  const icon = document.getElementById('liveTrackingIcon');
+  const text = document.getElementById('liveTrackingText');
+  if (icon && text) {
+    icon.textContent = isLiveTrackingEnabled ? '🟢' : '🔴';
+    text.textContent = isLiveTrackingEnabled ? 'Live Tracking: ON' : 'Live Tracking: OFF';
+  }
+}
+
+window.toggleLiveTracking = async function() {
+  const newState = !isLiveTrackingEnabled;
+  try {
+    await setDoc(doc(db, 'settings', 'general'), { liveTrackingEnabled: newState }, { merge: true });
+    isLiveTrackingEnabled = newState;
+    updateLiveTrackingUI();
+    showToast(`Live tracking is now ${newState ? 'ON' : 'OFF'}`, 'success');
+  } catch(e) {
+    console.error(e);
+    showToast('Failed to update live tracking', 'error');
   }
 };
 </script>
